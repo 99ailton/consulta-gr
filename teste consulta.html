@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>De Olho no Transporte - A GR do Motorista</title>
+
+    <style>
+        :root {
+            --azul-petroleo: #004d5b;
+            --azul-claro: #007a8c;
+            --vermelho-alerta: #d9534f;
+            --cinza-fundo: #f4f7f6;
+            --branco: #ffffff;
+            --borda: #ddd;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--cinza-fundo);
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: var(--azul-petroleo);
+            color: var(--branco);
+            text-align: center;
+            padding: 40px 20px;
+            border-bottom: 5px solid var(--azul-claro);
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 30px;
+            text-transform: uppercase;
+        }
+
+        header p {
+            margin: 10px 0 0;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 3px;
+            color: #a8dadc;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 0 20px;
+        }
+
+        @media (max-width: 850px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--branco);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid var(--borda);
+        }
+
+        .card-header {
+            padding: 15px;
+            text-align: center;
+            color: white;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .bg-alerta {
+            background-color: var(--vermelho-alerta);
+        }
+
+        .bg-consulta {
+            background-color: var(--azul-petroleo);
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: var(--azul-petroleo);
+            font-size: 14px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+        }
+
+        .secao-endereco {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #eee;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .col-8 {
+            flex: 2;
+        }
+
+        .col-4 {
+            flex: 1;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .btn-alerta {
+            background-color: var(--vermelho-alerta);
+        }
+
+        .btn-consulta {
+            background-color: var(--azul-petroleo);
+        }
+
+        #status-registro,
+        #resultado-consulta {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: bold;
+        }
+
+        .item-historico {
+            border-bottom: 1px solid #eee;
+            padding: 10px 0;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>DE OLHO NO TRANSPORTE</h1>
+    <p>A GR DO MOTORISTA</p>
+</header>
+
+<div class="container">
+
+    <section class="card">
+        <div class="card-header bg-alerta">⚠️ REGISTRAR OCORRÊNCIA</div>
+        <div class="card-body">
+
+            <label>CNPJ da Empresa</label>
+            <input type="text" id="cnpj_add" placeholder="00.000.000/0000-00" onblur="buscarDadosEmpresa(this.value)">
+
+            <div class="secao-endereco">
+                <label>Razão Social</label>
+                <input type="text" id="razao_social" readonly style="background:#eee">
+
+                <div class="row">
+                    <div class="col-8">
+                        <label>Rua</label>
+                        <input type="text" id="rua_empresa">
+                    </div>
+
+                    <div class="col-4">
+                        <label>Nº</label>
+                        <input type="text" id="num_empresa">
+                    </div>
+                </div>
+
+                <label>Cidade</label>
+                <input type="text" id="cidade_empresa">
+            </div>
+
+            <label>Qual o Problema?</label>
+            <select id="tipo_problema">
+                <option value="">Selecione...</option>
+                <option>Banheiro / Instalações Sujas</option>
+                <option>Falta de Pagamento / Calote</option>
+                <option>Demora no Descarregamento (+5h)</option>
+            </select>
+
+            <label>Descrição</label>
+            <textarea id="relato" rows="2"></textarea>
+
+            <button class="btn btn-alerta" onclick="publicarOcorrencia()">Publicar Ocorrência</button>
+
+            <div id="status-registro"></div>
+        </div>
+    </section>
+
+    <section class="card">
+        <div class="card-header bg-consulta">🔍 CONSULTAR REPUTAÇÃO</div>
+        <div class="card-body">
+            <label>CNPJ para verificar histórico</label>
+            <input type="text" id="cnpj_search" placeholder="00.000.000/0000-00">
+
+            <button class="btn btn-consulta" onclick="consultarHistorico()">Verificar GR</button>
+
+            <div id="resultado-consulta"></div>
+        </div>
+    </section>
+
+</div>
+
+<script>
+
+    // SUA URL DO SHEETDB AQUI
+    const API_SHEETDB = "https://sheetdb.io/api/v1/h4uzqojz3ccgo";
+
+    async function buscarDadosEmpresa(cnpj) {
+        const cleanCnpj = cnpj.replace(/\D/g, '');
+
+        if (cleanCnpj.length === 14) {
+            const res = await fetch(`https://brasilapi.com.br/api/cnpj/v1/${cleanCnpj}`);
+            const data = await res.json();
+
+            if (data.razao_social) {
+                document.getElementById('razao_social').value = data.razao_social;
+                document.getElementById('rua_empresa').value = data.logradouro || "";
+                document.getElementById('num_empresa').value = data.numero || "";
+                document.getElementById('cidade_empresa').value = data.municipio || "";
+            }
+        }
+    }
+
+    async function publicarOcorrencia() {
+
+        const status = document.getElementById('status-registro');
+        status.innerHTML = "⏳ Processando...";
+
+        const dados = {
+            data: {
+                cnpj: document.getElementById('cnpj_add').value,
+                razao: document.getElementById('razao_social').value,
+                problema: document.getElementById('tipo_problema').value,
+                relato: document.getElementById('relato').value,
+                foto: "Sem foto",
+                cidade: document.getElementById('cidade_empresa').value
+            }
+        };
+
+        const res = await fetch(API_SHEETDB, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(dados)
+        });
+
+        if (res.ok) {
+            status.innerHTML = "✅ PUBLICADO COM SUCESSO!";
+            document.getElementById('cnpj_add').value = "";
+            document.getElementById('relato').value = "";
+            document.getElementById('tipo_problema').value = "";
+        }
+    }
+
+    async function consultarHistorico() {
+
+        const cnpj = document.getElementById('cnpj_search').value;
+        const resDiv = document.getElementById('resultado-consulta');
+
+        resDiv.innerHTML = "🔍 Buscando...";
+
+        const res = await fetch(`${API_SHEETDB}/search?cnpj=${cnpj}`);
+        const dados = await res.json();
+
+        if (dados.length > 0) {
+            let html = `<h3>⚠️ ${dados.length} ocorrência(s) encontrada(s)</h3>`;
+
+            dados.forEach(item => {
+                html += `
+                    <div class="item-historico">
+                        <strong>${item.problema}</strong><br>
+                        ${item.relato}<br>
+                        <em>(Sem foto)</em>
+                    </div>
+                `;
+            });
+
+            resDiv.innerHTML = html;
+
+        } else {
+            resDiv.innerHTML = "✅ Nenhuma ocorrência para este CNPJ.";
+        }
+    }
+
+</script>
+
+</body>
+</html>
